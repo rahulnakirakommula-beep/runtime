@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Leaderboard - TechCorp Inc.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #333;
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 25px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 25px;
+            outline: none;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-item {
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 20px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .leaderboard-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .leaderboard-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .leaderboard-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* Leaderboard Container */
+        .leaderboard-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .leaderboard-item:hover::before {
+            left: 100%;
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateX(5px);
+        }
+
+        /* Top 3 Special Styling */
+        .rank-1 {
+            background: linear-gradient(45deg, rgba(255, 215, 0, 0.1), rgba(255, 223, 0, 0.05));
+            border-left: 5px solid #FFD700;
+        }
+
+        .rank-2 {
+            background: linear-gradient(45deg, rgba(192, 192, 192, 0.1), rgba(192, 192, 192, 0.05));
+            border-left: 5px solid #C0C0C0;
+        }
+
+        .rank-3 {
+            background: linear-gradient(45deg, rgba(205, 127, 50, 0.1), rgba(205, 127, 50, 0.05));
+            border-left: 5px solid #CD7F32;
+        }
+
+        .rank-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            width: 60px;
+            text-align: center;
+            margin-right: 1rem;
+        }
+
+        .rank-1 .rank-number {
+            color: #FFD700;
+            text-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+        }
+
+        .rank-2 .rank-number {
+            color: #C0C0C0;
+            text-shadow: 0 2px 4px rgba(192, 192, 192, 0.3);
+        }
+
+        .rank-3 .rank-number {
+            color: #CD7F32;
+            text-shadow: 0 2px 4px rgba(205, 127, 50, 0.3);
+        }
+
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-right: 1.5rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .profile-info {
+            flex: 1;
+            margin-right: 1rem;
+        }
+
+        .profile-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.3rem;
+        }
+
+        .profile-title {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .profile-department {
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        .star-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-right: 1rem;
+        }
+
+        .star {
+            font-size: 1.5rem;
+            color: #FFD700;
+            text-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .star-count {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-left: 0.5rem;
+        }
+
+        .achievement-badge {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Special crown for #1 */
+        .crown {
+            font-size: 2rem;
+            margin-right: 0.5rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        /* Animations */
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .navbar-left {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .leaderboard-title {
+                font-size: 2rem;
+            }
+
+            .leaderboard-item {
+                padding: 1rem;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .profile-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 1rem;
+            }
+
+            .star-rating {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .leaderboard-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .rank-number {
+                margin-right: 0;
+            }
+
+            .profile-info {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <div class="company-name">TechCorp Inc.</div>
+            <div class="profile-name">John Smith</div>
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Search professionals...">
+            </div>
+        </div>
+        <div class="navbar-right">
+            <a href="#" class="nav-item">Dashboard</a>
+            <a href="#" class="nav-item">Profile</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="leaderboard-header">
+            <h1 class="leaderboard-title">🏆 Professional Leaderboard</h1>
+            <p class="leaderboard-subtitle">Top performing professionals ranked by star ratings</p>
+        </div>
+
+        <div class="leaderboard-container" id="leaderboard">
+            <!-- Leaderboard items will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Professional data with star ratings
+        const professionals = [
+            {
+                name: "Sarah Chen",
+                title: "Senior Software Engineer",
+                department: "Engineering",
+                stars: 4.9,
+                achievements: "Innovation Leader"
+            },
+            {
+                name: "Michael Rodriguez",
+                title: "Product Manager",
+                department: "Product",
+                stars: 4.8,
+                achievements: "Team Player"
+            },
+            {
+                name: "Emily Johnson",
+                title: "Data Scientist",
+                department: "Analytics",
+                stars: 4.7,
+                achievements: "Problem Solver"
+            },
+            {
+                name: "David Kim",
+                title: "UX Designer",
+                department: "Design",
+                stars: 4.6,
+                achievements: "Creative Genius"
+            },
+            {
+                name: "Lisa Wang",
+                title: "DevOps Engineer",
+                department: "Infrastructure",
+                stars: 4.5,
+                achievements: "Reliability Expert"
+            },
+            {
+                name: "James Thompson",
+                title: "Marketing Manager",
+                department: "Marketing",
+                stars: 4.4,
+                achievements: "Growth Driver"
+            },
+            {
+                name: "Anna Petrov",
+                title: "Quality Assurance Lead",
+                department: "QA",
+                stars: 4.3,
+                achievements: "Quality Champion"
+            },
+            {
+                name: "Robert Brown",
+                title: "Sales Director",
+                department: "Sales",
+                stars: 4.2,
+                achievements: "Revenue Generator"
+            },
+            {
+                name: "Maria Garcia",
+                title: "HR Specialist",
+                department: "Human Resources",
+                stars: 4.1,
+                achievements: "People Person"
+            },
+            {
+                name: "Alex Turner",
+                title: "Backend Developer",
+                department: "Engineering",
+                stars: 4.0,
+                achievements: "Code Master"
+            }
+        ];
+
+        // Sort professionals by star rating (highest first)
+        professionals.sort((a, b) => b.stars - a.stars);
+
+        // Generate star display
+        function generateStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            let starsHTML = '';
+            
+            for (let i = 0; i < fullStars; i++) {
+                starsHTML += '<span class="star">⭐</span>';
+            }
+            
+            if (hasHalfStar) {
+                starsHTML += '<span class="star">⭐</span>';
+            }
+            
+            return starsHTML;
+        }
+
+        // Get initials for avatar
+        function getInitials(name) {
+            return name.split(' ').map(word => word[0]).join('');
+        }
+
+        // Populate leaderboard
+        function populateLeaderboard() {
+            const leaderboard = document.getElementById('leaderboard');
+            
+            professionals.forEach((professional, index) => {
+                const rank = index + 1;
+                const item = document.createElement('div');
+                item.className = `leaderboard-item ${rank <= 3 ? `rank-${rank}` : ''}`;
+                
+                item.innerHTML = `
+                    ${rank === 1 ? '<span class="crown">👑</span>' : ''}
+                    <div class="rank-number">#${rank}</div>
+                    <div class="profile-avatar">${getInitials(professional.name)}</div>
+                    <div class="profile-info">
+                        <div class="profile-name">${professional.name}</div>
+                        <div class="profile-title">${professional.title}</div>
+                        <div class="profile-department">${professional.department}</div>
+                    </div>
+                    <div class="star-rating">
+                        ${generateStars(professional.stars)}
+                        <span class="star-count">${professional.stars}</span>
+                    </div>
+                    <div class="achievement-badge">${professional.achievements}</div>
+                `;
+                
+                // Add animation delay
+                item.style.animation = `slideIn 0.5s ease ${index * 0.1}s both`;
+                
+                leaderboard.appendChild(item);
+            });
+        }
+
+        // Search functionality
+        document.querySelector('.search-bar').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.leaderboard-item');
+            
+            items.forEach(item => {
+                const name = item.querySelector('.profile-name').textContent.toLowerCase();
+                const title = item.querySelector('.profile-title').textContent.toLowerCase();
+                const department = item.querySelector('.profile-department').textContent.toLowerCase();
+                
+                if (name.includes(searchTerm) || title.includes(searchTerm) || department.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Initialize leaderboard on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            populateLeaderboard();
+        });
+    </script>
+</body>
+</html>

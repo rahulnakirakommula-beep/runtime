@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Chat - TechCorp Inc.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chat-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 25px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .online-count {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 20px;
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .nav-item {
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 20px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Main Chat Container */
+        .chat-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 250px;
+            height: calc(100vh - 80px);
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .user-list {
+            padding: 1rem;
+            height: calc(100% - 60px);
+            overflow-y: auto;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 15px;
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .user-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(5px);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .user-status {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .online { background: #22c55e; }
+        .away { background: #f59e0b; }
+        .offline { background: #6b7280; }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* Main Chat Area */
+        .chat-main {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-meta {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .message-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .message-content {
+            margin-left: 2.5rem;
+            background: rgba(102, 126, 234, 0.05);
+            padding: 0.75rem 1rem;
+            border-radius: 15px;
+            border-left: 3px solid rgba(102, 126, 234, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        .message-content.own {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            margin-left: 0;
+            margin-right: 2.5rem;
+            border-left: none;
+            border-right: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: 2.5rem;
+            color: #666;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 2px;
+        }
+
+        .typing-dot {
+            width: 4px;
+            height: 4px;
+            background: #666;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        /* Input Area */
+        .input-container {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-top: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 20px;
+            outline: none;
+            font-size: 1rem;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .input-btn {
+            padding: 0.75rem;
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #667eea;
+        }
+
+        .input-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .send-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Right Sidebar */
+        .right-sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .sidebar-section {
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .section-header {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1rem;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            background: rgba(102, 126, 234, 0.15);
+        }
+
+        .section-content {
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .shared-file {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 10px;
+            background: rgba(102, 126, 234, 0.05);
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .shared-file:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(3px);
+        }
+
+        .file-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .file-size {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .chat-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+            
+            .sidebar, .right-sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+            
+            .navbar-left {
+                gap: 1rem;
+            }
+            
+            .company-name {
+                font-size: 1.2rem;
+            }
+            
+            .chat-title {
+                font-size: 1rem;
+            }
+            
+            .chat-container {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <div class="company-name">TechCorp Inc.</div>
+            <div class="chat-title">💬 Project Alpha Team</div>
+        </div>
+        <div class="navbar-right">
+            <div class="online-count">
+                <div class="online-dot"></div>
+                <span>12 online</span>
+            </div>
+            <a href="#" class="nav-item">Settings</a>
+            <a href="#" class="nav-item">Dashboard</a>
+        </div>
+    </nav>
+
+    <!-- Main Chat Container -->
+    <div class="chat-container">
+        <!-- Left Sidebar - Users -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                👥 Team Members (12)
+            </div>
+            <div class="user-list">
+                <div class="user-item">
+                    <div class="user-avatar">
+                        JS
+                        <div class="user-status online"></div>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">John Smith</div>
+                        <div class="user-role">Project Manager</div>
+                    </div>
+                </div>
+                <div class="user-item">
+                    <div class="user-avatar">
+                        AD
+                        <div class="user-status online"></div>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">Alice Davis</div>
+                        <div class="user-role">Developer</div>
+                    </div>
+                </div>
+                <div class="user-item">
+                    <div class="user-avatar">
+                        BW
+                        <div class="user-status away"></div>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">Bob Wilson</div>
+                        <div class="user-role">Designer</div>
+                    </div>
+                </div>
+                <div class="user-item">
+                    <div class="user-avatar">
+                        CM
+                        <div class="user-status online"></div>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">Carol Miller</div>
+                        <div class="user-role">QA Engineer</div>
+                    </div>
+                </div>
+                <div class="user-item">
+                    <div class="user-avatar">
+                        DL
+                        <div class="user-status offline"></div>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">David Lee</div>
+                        <div class="user-role">Backend Dev</div>
+                    </div>
+                </div>
+                <div class="user-item">
+                    <div class="user-avatar">
+                        EB
+                        <div class="user-status online"></div>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">Emma Brown</div>
+                        <div class="user-role">UI/UX Designer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <div class="chat-header">
+                <div class="chat-info">
+                    <h3>Project Alpha Team</h3>
+                    <div class="chat-meta">12 members • Last active now</div>
+                </div>
+                <div class="chat-actions">
+                    <button class="action-btn" onclick="toggleCall()">📞</button>
+                    <button class="action-btn" onclick="toggleVideo()">📹</button>
+                    <button class="action-btn" onclick="shareScreen()">🖥</button>
+                    <button class="action-btn" onclick="showSettings()">⚙</button>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="message-group">
+                    <div class="message-header">
+                        <div class="message-avatar">JS</div>
+                        <div class="message-sender">John Smith</div>
+                        <div class="message-time">Today at 9:15 AM</div>
+                    </div>
+                    <div class="message-content">
+                        Good morning team! Let's discuss the progress on the Alpha project. We have some important milestones coming up.
+                    </div>
+                </div>
+
+                <div class="message-group">
+                    <div class="message-header">
+                        <div class="message-avatar">AD</div>
+                        <div class="message-sender">Alice Davis</div>
+                        <div class="message-time">Today at 9:18 AM</div>
+                    </div>
+                    <div class="message-content">
+                        Morning John! I've completed the backend API for user authentication. The endpoints are ready for testing.
+                    </div>
+                </div>
+
+                <div class="message-group">
+                    <div class="message-header">
+                        <div class="message-avatar">BW</div>
+                        <div class="message-sender">Bob Wilson</div>
+                        <div class="message-time">Today at 9:20 AM</div>
+                    </div>
+                    <div class="message-content">
+                        Great work Alice! I'm working on the UI mockups for the dashboard. Should have them ready by noon.
+                    </div>
+                </div>
+
+                <div class="message-group">
+                    <div class="message-header">
+                        <div class="message-avatar">JS</div>
+                        <div class="message-sender">You</div>
+                        <div class="message-time">Today at 9:22 AM</div>
+                    </div>
+                    <div class="message-content own">
+                        Perfect! Let's schedule a review meeting for this afternoon to go over everything.
+                    </div>
+                </div>
+
+                <div class="message-group">
+                    <div class="message-header">
+                        <div class="message-avatar">CM</div>
+                        <div class="message-sender">Carol Miller</div>
+                        <div class="message-time">Today at 9:25 AM</div>
+                    </div>
+                    <div class="message-content">
+                        I'll prepare the test cases for the authentication flow. Also, should we discuss the deployment strategy?
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                    <div class="message-avatar">EB</div>
+                    <span>Emma is typing</span>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea class="message-input" id="messageInput" placeholder="Type your message..." rows="1"></textarea>
+                    <div class="input-actions">
+                        <button class="input-btn" onclick="attachFile()">📎</button>
+                        <button class="input-btn" onclick="addEmoji()">😊</button>
+                        <button class="input-btn send-btn" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Files & Info -->
+        <div class="right-sidebar">
+            <div class="sidebar-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    📁 Shared Files
+                </div>
+                <div class="section-content">
+                    <div class="shared-file" onclick="openFile('project-spec.pdf')">
+                        <div class="file-icon">📄</div>
+                        <div class="file-info">
+                            <div class="file-name">project-spec.pdf</div>
+                            <div class="file-size">2.3 MB</div>
+                        </div>
+                    </div>
+                    <div class="shared-file" onclick="openFile('wireframes.fig')">
+                        <div class="file-icon">🎨</div>
+                        <div class="file-info">
+                            <div class="file-name">wireframes.fig</div>
+                            <div class="file-size">5.1 MB</div>
+                        </div>
+                    </div>
+                    <div class="shared-file" onclick="openFile('api-docs.md')">
+                        <div class="file-icon">📝</div>
+                        <div class="file-info">
+                            <div class="file-name">api-docs.md</div>
+                            <div class="file-size">845 KB</div>
+                        </div>
+                    </div>
+                    <div class="shared-file" onclick="openFile('demo-video.mp4')">
+                        <div class="file-icon">🎬</div>
+                        <div class="file-info">
+                            <div class="file-name">demo-video.mp4</div>
+                            <div class="file-size">12.7 MB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    📌 Pinned Messages
+                </div>
+                <div class="section-content">
+                    <div class="message-content" style="margin: 0 0 0.5rem 0; font-size: 0.85rem;">
+                        Daily standup at 10 AM in Conference Room A
+                    </div>
+                    <div class="message-content" style="margin: 0 0 0.5rem 0; font-size: 0.85rem;">
+                        Code review deadline: Friday 5 PM
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    ⚡ Quick Actions
+                </div>
+                <div class="section-content">
+                    <button class="input-btn" style="width: 100%; margin-bottom: 0.5rem;" onclick="createMeeting()">
+                        📅 Schedule Meeting
+                    </button>
+                    <button class="input-btn" style="width: 100%; margin-bottom: 0.5rem;" onclick="shareFile()">
+                        📤 Share File
+                    </button>
+                    <button class="input-btn" style="width: 100%;" onclick="createTask()">
+                        ✅ Create Task
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-resize textarea
+        const messageInput = document.getElementById('messageInput');
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Send message functionality
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const messagesContainer = document.getElementById('messagesContainer');
+            
+            if (input.value.trim() === '') return;
+            
+            // Create message group
+            const messageGroup = document.createElement('div');
+            messageGroup.className = 'message-group';
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            messageGroup.innerHTML = `
+                <div class="message-header">
+                    <div class="message-avatar">You</div>
+                    <div class="message-sender">You</div>
+                    <div class="message-time">Today at ${timeString}</div>
+                </div>
+                <div class="message-content own">${input.value}</div>
+            `;
+            
+            messagesContainer.appendChild(messageGroup);
+            
+            // Clear input and reset height
+            input.value = '';
+            input.style.height = 'auto';
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Show typing indicator for a moment
+            showTypingIndicator();
+        }
+
+        // Handle Enter key (Shift+Enter for new line)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'flex';
+            
+            setTimeout(() => {
+                indicator.style.display = 'none';
+                
+                // Add a simulated response
+                setTimeout(() => {
+                    addSimulatedMessage();
+                }, 500);
+            }, 2000);
+        }
+
+        // Add simulated message
+        function addSimulatedMessage() {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const responses = [
+                { sender: 'Emma Brown', avatar: 'EB', message: 'Sounds good! I\'ll join the meeting.' },
+                { sender: 'Alice Davis', avatar: 'AD', message: 'I can help with the technical review.' },
+                { sender: 'Bob Wilson', avatar: 'BW', message: 'Let me know if you need any design assets.' }
+            ];
+            
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            const messageGroup = document.createElement('div');
+            messageGroup.className = 'message-group';
+            messageGroup.innerHTML = `
+                <div class="message-header">
+                    <div class="message-avatar">${randomResponse.avatar}</div>
+                    <div class="message-sender">${randomResponse.sender}</div>
+                    <div class="message-time">Today at ${timeString}</div>
+                </div>
+                <div class="message-content">${randomResponse.message}</div>
+            `;
+            
+            messagesContainer.appendChild(messageGroup);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Utility functions
+        function attachFile() {
+            alert('File attachment feature would open here');
+        }
+
+        function addEmoji() {
+            const input

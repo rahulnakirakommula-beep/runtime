@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Development Documents - TechCorp Inc.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #333;
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 25px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 25px;
+            outline: none;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-item {
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 20px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            height: calc(100vh - 120px);
+        }
+
+        /* AI Chat Section */
+        .chat-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 15px;
+            max-width: 80%;
+            animation: slideIn 0.3s ease;
+        }
+
+        .user-message {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .ai-message {
+            background: rgba(102, 126, 234, 0.1);
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-input-container {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.02);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            outline: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Documents Section */
+        .documents-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .documents-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .documents-content {
+            padding: 1rem;
+            flex: 1;
+        }
+
+        .document-category {
+            margin-bottom: 2rem;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-header:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateX(5px);
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .category-count {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .document-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-left: 1rem;
+        }
+
+        .document-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .document-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .document-item:hover::before {
+            left: 100%;
+        }
+
+        .document-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .document-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .document-info {
+            flex: 1;
+        }
+
+        .document-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .document-meta {
+            color: #666;
+            font-size: 0.8rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .document-status {
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-current {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-draft {
+            background: #FF9800;
+            color: white;
+        }
+
+        .status-review {
+            background: #2196F3;
+            color: white;
+        }
+
+        .status-archived {
+            background: #9E9E9E;
+            color: white;
+        }
+
+        .collapse-toggle {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .category-collapsed .collapse-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .category-collapsed .document-list {
+            display: none;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .navbar-left {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1rem;
+                height: auto;
+            }
+
+            .chat-section {
+                height: 400px;
+            }
+
+            .documents-section {
+                height: 600px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .company-name {
+                font-size: 1.2rem;
+            }
+
+            .document-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+
+            .document-meta {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <div class="company-name">TechCorp Inc.</div>
+            <div class="profile-name">John Smith</div>
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Search documents...">
+            </div>
+        </div>
+        <div class="navbar-right">
+            <a href="#" class="nav-item">Dashboard</a>
+            <a href="#" class="nav-item">Profile</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- AI Chat Section -->
+        <div class="chat-section">
+            <div class="chat-header">
+                🤖 Development Assistant
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai-message">
+                    Hello! I'm your development assistant. I can help you with software documentation, process questions, and development guidance. What would you like to know?
+                </div>
+                <div class="message user-message">
+                    Can you explain the software development lifecycle?
+                </div>
+                <div class="message ai-message">
+                    The SDLC includes Planning, Analysis, Design, Implementation, Testing, and Maintenance phases. Each phase has specific deliverables and documentation requirements. Would you like me to elaborate on any specific phase?
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" placeholder="Ask about development processes..." id="chatInput">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <!-- Documents Section -->
+        <div class="documents-section">
+            <div class="documents-header">
+                📋 Development Documents
+            </div>
+            <div class="documents-content">
+                <!-- Software Development Plans -->
+                <div class="document-category">
+                    <div class="category-header" onclick="toggleCategory(this)">
+                        <span class="collapse-toggle">▼</span>
+                        <span>🛠️</span>
+                        <span class="category-title">Software Development Plans</span>
+                        <span class="category-count">8</span>
+                    </div>
+                    <div class="document-list">
+                        <div class="document-item" onclick="openDocument('project-plan')">
+                            <span class="document-icon">📋</span>
+                            <div class="document-info">
+                                <div class="document-name">Project Development Plan v2.1</div>
+                                <div class="document-meta">
+                                    <span>Modified: 2 days ago</span>
+                                    <span>Size: 2.3 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-current">Current</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('sprint-plan')">
+                            <span class="document-icon">🏃</span>
+                            <div class="document-info">
+                                <div class="document-name">Sprint Planning Template</div>
+                                <div class="document-meta">
+                                    <span>Modified: 1 week ago</span>
+                                    <span>Size: 856 KB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-current">Current</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('release-plan')">
+                            <span class="document-icon">🚀</span>
+                            <div class="document-info">
+                                <div class="document-name">Release Management Plan</div>
+                                <div class="document-meta">
+                                    <span>Modified: 3 days ago</span>
+                                    <span>Size: 1.2 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-review">Review</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('architecture-plan')">
+                            <span class="document-icon">🏗️</span>
+                            <div class="document-info">
+                                <div class="document-name">System Architecture Plan</div>
+                                <div class="document-meta">
+                                    <span>Modified: 1 week ago</span>
+                                    <span>Size: 3.1 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-current">Current</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Process Documentation -->
+                <div class="document-category">
+                    <div class="category-header" onclick="toggleCategory(this)">
+                        <span class="collapse-toggle">▼</span>
+                        <span>⚙️</span>
+                        <span class="category-title">Process Documentation</span>
+                        <span class="category-count">12</span>
+                    </div>
+                    <div class="document-list">
+                        <div class="document-item" onclick="openDocument('coding-standards')">
+                            <span class="document-icon">📝</span>
+                            <div class="document-info">
+                                <div class="document-name">Coding Standards & Guidelines</div>
+                                <div class="document-meta">
+                                    <span>Modified: 5 days ago</span>
+                                    <span>Size: 1.8 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-current">Current</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('testing-process')">
+                            <span class="document-icon">🧪</span>
+                            <div class="document-info">
+                                <div class="document-name">Testing Process Documentation</div>
+                                <div class="document-meta">
+                                    <span>Modified: 1 week ago</span>
+                                    <span>Size: 2.7 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-current">Current</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('deployment-process')">
+                            <span class="document-icon">🚢</span>
+                            <div class="document-info">
+                                <div class="document-name">Deployment Process Guide</div>
+                                <div class="document-meta">
+                                    <span>Modified: 3 days ago</span>
+                                    <span>Size: 1.1 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-review">Review</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('code-review')">
+                            <span class="document-icon">👀</span>
+                            <div class="document-info">
+                                <div class="document-name">Code Review Checklist</div>
+                                <div class="document-meta">
+                                    <span>Modified: 2 weeks ago</span>
+                                    <span>Size: 445 KB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-current">Current</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Documentation -->
+                <div class="document-category">
+                    <div class="category-header" onclick="toggleCategory(this)">
+                        <span class="collapse-toggle">▼</span>
+                        <span>👥</span>
+                        <span class="category-title">User Documentation</span>
+                        <span class="category-count">9</span>
+                    </div>
+                    <div class="document-list">
+                        <div class="document-item" onclick="openDocument('user-manual')">
+                            <span class="document-icon">📖</span>
+                            <div class="document-info">
+                                <div class="document-name">User Manual v3.2</div>
+                                <div class="document-meta">
+                                    <span>Modified: 1 day ago</span>
+                                    <span>Size: 4.2 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-current">Current</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('api-docs')">
+                            <span class="document-icon">🔌</span>
+                            <div class="document-info">
+                                <div class="document-name">API Documentation</div>
+                                <div class="document-meta">
+                                    <span>Modified: 4 days ago</span>
+                                    <span>Size: 2.9 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-current">Current</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('installation-guide')">
+                            <span class="document-icon">💿</span>
+                            <div class="document-info">
+                                <div class="document-name">Installation Guide</div>
+                                <div class="document-meta">
+                                    <span>Modified: 1 week ago</span>
+                                    <span>Size: 1.5 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-current">Current</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('faq')">
+                            <span class="document-icon">❓</span>
+                            <div class="document-info">
+                                <div class="document-name">Frequently Asked Questions</div>
+                                <div class="document-meta">
+                                    <span>Modified: 6 days ago</span>
+                                    <span>Size: 890 KB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-draft">Draft</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Requirements -->
+                <div class="document-category">
+                    <div class="category-header" onclick="toggleCategory(this)">
+                        <span class="collapse-toggle">▼</span>
+                        <span>💼</span>
+                        <span class="category-title">Business Requirements</span>
+                        <span class="category-count">7</span>
+                    </div>
+                    <div class="document-list">
+                        <div class="document-item" onclick="openDocument('brd')">
+                            <span class="document-icon">📊</span>
+                            <div class="document-info">
+                                <div class="document-name">Business Requirements Document</div>
+                                <div class="document-meta">
+                                    <span>Modified: 3 days ago</span>
+                                    <span>Size: 3.8 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-current">Current</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('functional-spec')">
+                            <span class="document-icon">⚡</span>
+                            <div class="document-info">
+                                <div class="document-name">Functional Specifications</div>
+                                <div class="document-meta">
+                                    <span>Modified: 1 week ago</span>
+                                    <span>Size: 2.4 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-review">Review</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('use-cases')">
+                            <span class="document-icon">🎯</span>
+                            <div class="document-info">
+                                <div class="document-name">Use Case Scenarios</div>
+                                <div class="document-meta">
+                                    <span>Modified: 5 days ago</span>
+                                    <span>Size: 1.7 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-current">Current</div>
+                        </div>
+                        <div class="document-item" onclick="openDocument('acceptance-criteria')">
+                            <span class="document-icon">✅</span>
+                            <div class="document-info">
+                                <div class="document-name">Acceptance Criteria</div>
+                                <div class="document-meta">
+                                    <span>Modified: 2 days ago</span>
+                                    <span>Size: 1.3 MB</span>
+                                </div>
+                            </div>
+                            <div class="document-status status-draft">Draft</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chat functionality
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            if (input.value.trim() === '') return;
+            
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.textContent = input.value;
+            messagesContainer.appendChild(userMessage);
+            
+            // Clear input
+            const userText = input.value;
+            input.value = '';
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'message ai-message';
+                aiMessage.textContent = getAIResponse(userText);
+                messagesContainer.appendChild(aiMessage);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 1000);
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Simulate AI responses related to development
+        function getAIResponse(userInput) {
+            const responses = [
+                "I can help you understand that document. Which specific section would you like me to explain?",
+                "That's a great development question! Let me break down the process for you...",
+                "Based on our documentation standards, here's what I recommend...",
+                "I see you're asking about our development workflow. Here's how we typically handle that...",
+                "That document contains important guidelines. Would you like me to summarize the key points?",
+                "Great question about our processes! Let me walk you through the best practices..."
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Handle Enter key in chat input
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Toggle category collapse/expand
+        function toggleCategory(header) {
+            const category = header.parentElement;
+            category.classList.toggle('category-collapsed');
+        }
+
+        // Open document function
+        function openDocument(docId) {
+            // In a real application, this would open the actual document
+            const event = new CustomEvent('documentOpen', { detail: { docId } });
+            document.dispatchEvent(event);
+            
+            // For demo purposes, show an alert
+            const docName = event.target.querySelector('.document-name').textContent;
+            alert(`Opening: ${docName}`);
+        }
+
+        // Search functionality
+        document.querySelector('.search-bar').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const documentItems = document.querySelectorAll('.document-item');
+            
+            documentItems.forEach(item => {
+                const documentName = item.querySelector('.document-name').textContent.toLowerCase();
+                const category = item.closest('.document-category');
+                
+                if (documentName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                    category.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Hide empty categories
+            document.querySelectorAll('.document-category').forEach(category => {
+                const visibleDocs = category.querySelectorAll('.document-item[style*="flex"]');
+                if (visibleDocs.length === 0 && searchTerm !== '') {
+                    category.style.display = 'none';
+                } else {
+                    category.style.display = 'block';
+                }
+            });
+        });
+
+        // Add animation on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const documentItems = document.querySelectorAll('.document-item');
+            documentItems.forEach((item, index) => {
+                item.style.animation = `slideIn 0.3s ease ${index * 0.05}s both`;
+            });
+        });
+    </script>
+</body>
+</html>

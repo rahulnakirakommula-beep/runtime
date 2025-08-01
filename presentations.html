@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Learning Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #333;
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 25px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 25px;
+            outline: none;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-item {
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 20px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Main Content Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            height: calc(100vh - 120px);
+        }
+
+        /* AI Chat Section */
+        .chat-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 15px;
+            max-width: 85%;
+            animation: slideIn 0.3s ease;
+        }
+
+        .user-message {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .ai-message {
+            background: rgba(102, 126, 234, 0.1);
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-input-container {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.02);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            outline: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Video Gallery Section */
+        .video-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .video-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .video-content {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #333;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 140px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-thumbnail::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-card:hover .video-thumbnail::before {
+            opacity: 1;
+        }
+
+        .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #667eea;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .video-card:hover .play-icon {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .video-info {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .video-category {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .chat-section {
+                height: 400px;
+            }
+
+            .videos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .navbar-left {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .main-container {
+                padding: 1rem;
+                height: auto;
+            }
+
+            .videos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .category-filters {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .company-name {
+                font-size: 1.2rem;
+            }
+
+            .videos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <div class="company-name">TechCorp Learning Hub</div>
+            <div class="profile-name">John Smith</div>
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Search videos or ask AI..." id="searchBar">
+            </div>
+        </div>
+        <div class="navbar-right">
+            <a href="#" class="nav-item">My Learning</a>
+            <a href="#" class="nav-item">Profile</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- AI Chat Section -->
+        <div class="chat-section">
+            <div class="chat-header">
+                🤖 AI Learning Assistant
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai-message">
+                    Hello! I'm your AI learning assistant. I can help you find relevant videos, explain concepts, or answer questions about any topic. What would you like to learn today?
+                </div>
+                <div class="message user-message">
+                    Can you recommend some videos about project management?
+                </div>
+                <div class="message ai-message">
+                    Great choice! I see we have several excellent project management videos. Check out "Agile Project Management" and "Leadership in Project Teams" on the right. Would you like me to explain any specific project management concepts?
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" placeholder="Ask me anything..." id="chatInput">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <!-- Video Gallery Section -->
+        <div class="video-section">
+            <div class="video-header">
+                🎥 Video Library
+            </div>
+            <div class="video-content">
+                <div class="category-filters">
+                    <button class="filter-btn active" onclick="filterVideos('all')">All Videos</button>
+                    <button class="filter-btn" onclick="filterVideos('business')">Business</button>
+                    <button class="filter-btn" onclick="filterVideos('technology')">Technology</button>
+                    <button class="filter-btn" onclick="filterVideos('leadership')">Leadership</button>
+                    <button class="filter-btn" onclick="filterVideos('skills')">Skills</button>
+                </div>
+
+                <div class="videos-grid" id="videosGrid">
+                    <div class="video-card" data-category="business" onclick="openVideo('https://www.youtube.com/watch?v=dQw4w9WgXcQ')">
+                        <div class="video-thumbnail">
+                            📊
+                            <div class="play-icon">▶</div>
+                            <div class="video-duration">15:30</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">Agile Project Management Fundamentals</div>
+                            <div class="video-meta">
+                                <span class="video-category">Business</span>
+                                <span>2.1K views</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="video-card" data-category="technology" onclick="openVideo('https://www.youtube.com/watch?v=3JZ_D3ELwOQ')">
+                        <div class="video-thumbnail">
+                            💻
+                            <div class="play-icon">▶</div>
+                            <div class="video-duration">22:45</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">Introduction to Machine Learning</div>
+                            <div class="video-meta">
+                                <span class="video-category">Technology</span>
+                                <span>5.7K views</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="video-card" data-category="leadership" onclick="openVideo('https://www.youtube.com/watch?v=kJQP7kiw5Fk')">
+                        <div class="video-thumbnail">
+                            👥
+                            <div class="play-icon">▶</div>
+                            <div class="video-duration">18:12</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">Leadership in Remote Teams</div>
+                            <div class="video-meta">
+                                <span class="video-category">Leadership</span>
+                                <span>3.4K views</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="video-card" data-category="technology" onclick="openVideo('https://www.youtube.com/watch?v=ysz5S6PUM-U')">
+                        <div class="video-thumbnail">
+                            🚀
+                            <div class="play-icon">▶</div>
+                            <div class="video-duration">12:08</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">Cloud Computing Essentials</div>
+                            <div class="video-meta">
+                                <span class="video-category">Technology</span>
+                                <span>1.9K views</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="video-card" data-category="business" onclick="openVideo('https://www.youtube.com/watch?v=ScMzIvxBSi4')">
+                        <div class="video-thumbnail">
+                            📈
+                            <div class="play-icon">▶</div>
+                            <div class="video-duration">25:33</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">Financial Planning for Startups</div>
+                            <div class="video-meta">
+                                <span class="video-category">Business</span>
+                                <span>4.2K views</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="video-card" data-category="skills" onclick="openVideo('https://www.youtube.com/watch?v=2Vv-BfVoq4g')">
+                        <div class="video-thumbnail">
+                            🎯
+                            <div class="play-icon">▶</div>
+                            <div class="video-duration">19:47</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">Effective Communication Skills</div>
+                            <div class="video-meta">
+                                <span class="video-category">Skills</span>
+                                <span>6.8K views</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="video-card" data-category="technology" onclick="openVideo('https://www.youtube.com/watch?v=ZbZSe6N_BXs')">
+                        <div class="video-thumbnail">
+                            🔒
+                            <div class="play-icon">▶</div>
+                            <div class="video-duration">16:20</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">Cybersecurity Best Practices</div>
+                            <div class="video-meta">
+                                <span class="video-category">Technology</span>
+                                <span>2.5K views</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="video-card" data-category="leadership" onclick="openVideo('https://www.youtube.com/watch?v=PHe0bXAIuk0')">
+                        <div class="video-thumbnail">
+                            💡
+                            <div class="play-icon">▶</div>
+                            <div class="video-duration">21:15</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">Innovation Management Strategies</div>
+                            <div class="video-meta">
+                                <span class="video-category">Leadership</span>
+                                <span>3.1K views</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="video-card" data-category="skills" onclick="openVideo('https://www.youtube.com/watch?v=fC7oUOUEEi4')">
+                        <div class="video-thumbnail">
+                            ⏰
+                            <div class="play-icon">▶</div>
+                            <div class="video-duration">14:55</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">Time Management Mastery</div>
+                            <div class="video-meta">
+                                <span class="video-category">Skills</span>
+                                <span>8.3K views</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chat functionality
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            if (input.value.trim() === '') return;
+            
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.textContent = input.value;
+            messagesContainer.appendChild(userMessage);
+            
+            // Clear input
+            const userText = input.value;
+            input.value = '';
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'message ai-message';
+                aiMessage.textContent = getAIResponse(userText);
+                messagesContainer.appendChild(aiMessage);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 1000);
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Simulate AI responses based on user input
+        function getAIResponse(userInput) {
+            const input = userInput.toLowerCase();
+            
+            if (input.includes('project') || input.includes('management')) {
+                return "I recommend checking out our 'Agile Project Management Fundamentals' video. It covers sprint planning, team coordination, and delivery strategies. Would you like me to explain any specific project management methodology?";
+            } else if (input.includes('machine learning') || input.includes('ai') || input.includes('technology')) {
+                return "Great! Our 'Introduction to Machine Learning' video is perfect for beginners. It covers algorithms, data processing, and practical applications. I can also explain specific ML concepts if you have questions.";
+            } else if (input.includes('leadership') || input.includes('team')) {
+                return "Leadership skills are crucial! Check out 'Leadership in Remote Teams' and 'Innovation Management Strategies'. These cover modern leadership challenges and team dynamics. What specific leadership area interests you most?";
+            } else if (input.includes('communication') || input.includes('skills')) {
+                return "Communication is key to success! Our 'Effective Communication Skills' video covers verbal, non-verbal, and digital communication. I can provide tips for specific communication scenarios too.";
+            } else {
+                const responses = [
+                    "I can help you find relevant videos on that topic. Browse the video gallery or tell me what specific area you'd like to explore.",
+                    "That's an interesting question! Let me know what type of content would be most helpful - I can recommend specific videos from our library.",
+                    "I'm here to enhance your learning experience. Feel free to ask about any topic, and I'll guide you to the best resources.",
+                    "Great question! I can explain concepts, recommend videos, or help you understand complex topics. What would be most helpful?",
+                    "I'd be happy to help! You can explore our video categories or ask me to explain any specific concept you're curious about."
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+        }
+
+        // Handle Enter key in chat input
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Video functionality
+        function openVideo(url) {
+            window.open(url, '_blank');
+        }
+
+        // Filter functionality
+        function filterVideos(category) {
+            const allCards = document.querySelectorAll('.video-card');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            
+            // Update active filter button
+            filterBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter videos
+            allCards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                    card.style.animation = 'fadeIn 0.3s ease';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Search functionality
+        document.getElementById('searchBar').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const allCards = document.querySelectorAll('.video-card');
+            
+            allCards.forEach(card => {
+                const title = card.querySelector('.video-title').textContent.toLowerCase();
+                const category = card.querySelector('.video-category').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || category.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    card.style.animation = 'fadeIn 0.3s ease';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoCards = document.querySelectorAll('.video-card');
+            videoCards.forEach((card, index) => {
+                card.style.animation = slideIn 0.3s ease ${index * 0.1}s both;
+            });
+        });
+    </script>
+</body>
+</html>
